@@ -1,0 +1,39 @@
+name: Build Asphalt AI APK
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'AsphaltAI/**'
+      - '.github/workflows/build-asphalt-apk.yml'
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    defaults:
+      run:
+        working-directory: AsphaltAI
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Build APK
+        uses: ArtemSBulgakov/buildozer-action@v1
+        with:
+          command: buildozer android debug
+          workdir: AsphaltAI
+      - name: Verify APK
+        run: |
+          set -e
+          ls -lah bin/
+          test -n "$(find bin -maxdepth 1 -name '*.apk' -print -quit)"
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: AsphaltAI-APK
+          path: AsphaltAI/bin/*.apk
+          if-no-files-found: error
+          retention-days: 30
