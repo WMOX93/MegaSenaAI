@@ -19,3 +19,5 @@ log_level = 2
 warn_on_root = 1
 
 [app:android]
+android.sdk_path = /usr/local/lib/android/sdk
+android.ndk_path = /usr/local/lib/android/sdk/ndk/28.2.13676358
