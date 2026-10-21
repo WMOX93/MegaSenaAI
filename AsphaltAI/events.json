@@ -1,0 +1,11 @@
+[
+  {
+    "name": "Evento de exemplo",
+    "mission": "Complete 10 corridas",
+    "deadline": "2026-10-22T23:59:00-03:00",
+    "progress": 0,
+    "target": 10,
+    "reward": 1000,
+    "avg_race_seconds": 240
+  }
+]
