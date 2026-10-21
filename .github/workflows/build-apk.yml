@@ -53,9 +53,24 @@ jobs:
           python3 -m pip install --user buildozer cython==0.29.34
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
-      - name: Build APK with Buildozer
+      - name: Seed Buildozer Android SDK licenses
+        shell: bash
         run: |
-          buildozer -v android debug
+          set -euxo pipefail
+          SDK="$HOME/.buildozer/android/platform/android-sdk"
+          mkdir -p "$SDK/licenses"
+          if [ -f "$ANDROID_HOME/licenses/android-sdk-license" ]; then
+            cp "$ANDROID_HOME/licenses/android-sdk-license" "$SDK/licenses/android-sdk-license"
+          else
+            printf '%s\n' 'd56f5187479451eabf01fb78af6dfcb131a6481e' > "$SDK/licenses/android-sdk-license"
+          fi
+          if [ -f "$ANDROID_HOME/licenses/android-sdk-preview-license" ]; then
+            cp "$ANDROID_HOME/licenses/android-sdk-preview-license" "$SDK/licenses/android-sdk-preview-license"
+          fi
+          test -s "$SDK/licenses/android-sdk-license"
+
+      - name: Build APK with Buildozer
+        run: buildozer -v android debug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
