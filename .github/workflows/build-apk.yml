@@ -53,24 +53,28 @@ jobs:
           python3 -m pip install --user buildozer cython==0.29.34
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
-      - name: Seed Buildozer Android SDK licenses
+      - name: Configure Buildozer SDK and licenses
         shell: bash
         run: |
           set -euxo pipefail
-          SDK="$HOME/.buildozer/android/platform/android-sdk"
-          mkdir -p "$SDK/licenses"
-          if [ -f "$ANDROID_HOME/licenses/android-sdk-license" ]; then
-            cp "$ANDROID_HOME/licenses/android-sdk-license" "$SDK/licenses/android-sdk-license"
-          else
-            printf '%s\n' 'd56f5187479451eabf01fb78af6dfcb131a6481e' > "$SDK/licenses/android-sdk-license"
+          PLATFORM="$HOME/.buildozer/android/platform"
+          mkdir -p "$PLATFORM"
+          rm -rf "$PLATFORM/android-sdk"
+          ln -s "$ANDROID_HOME" "$PLATFORM/android-sdk"
+          mkdir -p "$HOME/.buildozer/android/platform/android-sdk/licenses"
+          if [ -d "$ANDROID_HOME/licenses" ]; then
+            cp -a "$ANDROID_HOME/licenses/." "$HOME/.buildozer/android/platform/android-sdk/licenses/" || true
           fi
-          if [ -f "$ANDROID_HOME/licenses/android-sdk-preview-license" ]; then
-            cp "$ANDROID_HOME/licenses/android-sdk-preview-license" "$SDK/licenses/android-sdk-preview-license"
-          fi
-          test -s "$SDK/licenses/android-sdk-license"
+          printf '%s\n' 'd56f5187479451eabf01fb78af6dfcb131a6481e' > "$HOME/.buildozer/android/platform/android-sdk/licenses/android-sdk-license"
+          test -L "$PLATFORM/android-sdk"
+          test -x "$PLATFORM/android-sdk/build-tools/35.0.0/aidl"
+          test -f "$PLATFORM/android-sdk/ndk/28.2.13676358/source.properties"
 
       - name: Build APK with Buildozer
-        run: buildozer -v android debug
+        shell: bash
+        run: |
+          set -euxo pipefail
+          buildozer -v android debug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
